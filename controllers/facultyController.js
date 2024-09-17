@@ -2,7 +2,6 @@ import jwt from 'json-web-token'
 import bcrypt from 'bcryptjs'
 import faculty from '../models/faculty/signup.js';
 
-
 export async function signup(req, res) {
   const { id, email, name, password } = req.body;
 
@@ -51,5 +50,5 @@ export async function signup(req, res) {
 }
 
 export async function login(req, res) {
-  res.status(201).json({ message: 'Signup successful' });
+  res.status(201).json({ message: 'Login successful' });
 }

@@ -15,7 +15,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 
-app.use('/faculty', faculty);
+app.use('/api/faculty', faculty);
 
 app.get('/', (req, res) => {
   res.send("Backend Chal rha h")

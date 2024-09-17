@@ -6,7 +6,7 @@ import cors from 'cors'
 const app = express();
 
 var corsOptions = {
-  origin: 'https://trackmyclass.vercel.app',
+  origin: ['https://trackmyclass.vercel.app', 'http://localhost:5173'],
   optionsSuccessStatus: 200
 }
 
@@ -20,6 +20,5 @@ app.use('/faculty', faculty);
 app.get('/', (req, res) => {
   res.send("Backend Chal rha h")
 })
-
 
 export default app;

@@ -50,10 +50,6 @@ export async function signup(req, res) {
   }
 }
 
-
 export async function login(req, res) {
-  res.send(req.body);
-
+  res.status(201).json({ message: 'Signup successful' });
 }
-
-

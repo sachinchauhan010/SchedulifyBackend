@@ -5,8 +5,13 @@ import cors from 'cors'
 
 const app = express();
 
+var corsOptions = {
+  origin: 'https://trackmyclass.vercel.app',
+  optionsSuccessStatus: 200
+}
+
 app.use(cookieParser());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 

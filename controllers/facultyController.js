@@ -2,6 +2,15 @@ import bcrypt from 'bcryptjs'
 import faculty from '../models/faculty/signup.js';
 import jwt from 'jsonwebtoken'
 
+export const getFacultyId= (req)=>{
+  console.log(req.cookies, "***")
+  const encodedToken=req.cookies?.facultyToken
+  if(!encodedToken) return null
+
+  const decodedToken=jwt.verify(encodedToken, process.env.JWT_SECRET)
+  return decodedToken?.id
+}
+
 export async function signup(req, res) {
   const { id, email, name, password } = req.body;
 
@@ -98,8 +107,27 @@ export async function login(req, res) {
 export async function setTimeTable(req, res){
   const timetableData= req.body;
   
-  //TODO: Find the faculty id using cookie 
+  try {
+    const setTT=await faculty.findOneAndUpdate({_id: getFacultyId(req)}, {$push: {setTimeTable:timetableData}})
 
+    if(!setTT){
+      return res.status(500).json({
+        success: false,
+        message: "Server Error",
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Time Table saved to DB",
+    })
+  
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    })
+  }
 
   timetableData
 }

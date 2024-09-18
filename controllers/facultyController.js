@@ -65,7 +65,7 @@ export async function login(req, res) {
   if(!isExistingFaculty){
     return res.status(400).json({success: false, message: 'Email not registered'})
   }
-  console.log(isExistingFaculty, "&&&&&&&&&&")
+  
   const hashPassword = isExistingFaculty?.facultyPassword;
   const isCorrectPassword = bcrypt.compareSync(password, hashPassword);
 

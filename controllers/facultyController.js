@@ -82,7 +82,7 @@ export async function login(req, res) {
     res.cookie("facultyToken", facultyToken, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production'|| false,
       sameSite: 'None'
     });
 

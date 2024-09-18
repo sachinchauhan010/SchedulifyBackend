@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import faculty from '../models/faculty/signup.js';
+import jwt from 'jsonwebtoken'
 
 export async function signup(req, res) {
   const { id, email, name, password } = req.body;
@@ -12,7 +13,7 @@ export async function signup(req, res) {
       });
     }
 
-    const existingFaculty = await faculty.findOne({ email, id });
+    const existingFaculty = await faculty.findOne({email});
 
     if (existingFaculty) {
       return res.status(400).json({
@@ -76,5 +77,29 @@ export async function login(req, res) {
     });
   }
 
+
+  const facultyToken = jwt.sign({ id: isExistingFaculty._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.cookie("facultyToken", facultyToken, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+    });
+
   res.status(201).json({success:true, message: 'Login successful' });
+}
+
+
+
+
+
+
+
+export async function setTimeTable(req, res){
+  const timetableData= req.body;
+  
+  //TODO: Find the faculty id using cookie 
+
+
+  timetableData
 }

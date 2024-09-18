@@ -23,7 +23,12 @@ const facultySignupSchema= new Schema({
     facultyPassword: {
       type:String,
       required: true,
+    },
+
+    facultyTimeTable:{
+      type: Array,
     }
+
 });
 
 const faculty= mongoose.model('faculty', facultySignupSchema );

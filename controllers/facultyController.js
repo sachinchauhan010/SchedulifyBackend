@@ -1,4 +1,3 @@
-import jwt from 'json-web-token'
 import bcrypt from 'bcryptjs'
 import faculty from '../models/faculty/signup.js';
 
@@ -49,6 +48,33 @@ export async function signup(req, res) {
   }
 }
 
+
+
+
 export async function login(req, res) {
-  res.status(201).json({ message: 'Login successful' });
+  const {email, password} = req.body;
+
+  if(!email || !password){
+    return res.status(400).json({
+      success: false,
+      message: `${ !email ? "Email" : "Password"} is required`,
+    });
+  }
+  
+  const isExistingFaculty=await faculty.findOne({facultyEmail:email})
+  if(!isExistingFaculty){
+    return res.status(400).json({success: false, message: 'Email not registered'})
+  }
+  console.log(isExistingFaculty, "&&&&&&&&&&")
+  const hashPassword = isExistingFaculty?.facultyPassword;
+  const isCorrectPassword = bcrypt.compareSync(password, hashPassword);
+
+  if(!isCorrectPassword){
+    return res.status(400).json({
+      success: false,
+      message: 'Password is invalid',
+    });
+  }
+
+  res.status(201).json({success:true, message: 'Login successful' });
 }

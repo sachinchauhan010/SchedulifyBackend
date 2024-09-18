@@ -5,8 +5,11 @@ import cors from 'cors'
 
 const app = express();
 
-var corsOptions = {
-  origin: ['https://trackmyclass.vercel.app', 'http://localhost:5173'],
+const corsOptions = {
+  credentials: true,
+  origin: 'https://trackmyclass.vercel.app',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  preflightContinue: true,
   optionsSuccessStatus: 200
 }
 

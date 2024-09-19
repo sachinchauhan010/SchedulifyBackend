@@ -2,12 +2,11 @@ import bcrypt from 'bcryptjs'
 import faculty from '../models/faculty/signup.js';
 import jwt from 'jsonwebtoken'
 
-export const getFacultyId= (req)=>{
-  console.log(req.cookies, "***")
-  const encodedToken=req.cookies?.facultyToken
-  if(!encodedToken) return null
+export const getFacultyId = (req) => {
+  const encodedToken = req.cookies?.facultyToken
+  if (!encodedToken) return null
 
-  const decodedToken=jwt.verify(encodedToken, process.env.JWT_SECRET)
+  const decodedToken = jwt.verify(encodedToken, process.env.JWT_SECRET)
   return decodedToken?.id
 }
 
@@ -22,7 +21,7 @@ export async function signup(req, res) {
       });
     }
 
-    const existingFaculty = await faculty.findOne({email});
+    const existingFaculty = await faculty.findOne({ email });
 
     if (existingFaculty) {
       return res.status(400).json({
@@ -62,55 +61,48 @@ export async function signup(req, res) {
 
 
 export async function login(req, res) {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
 
-  if(!email || !password){
+  if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: `${ !email ? "Email" : "Password"} is required`,
+      message: `${!email ? "Email" : "Password"} is required`,
     });
   }
-  
-  const isExistingFaculty=await faculty.findOne({facultyEmail:email})
-  if(!isExistingFaculty){
-    return res.status(400).json({success: false, message: 'Email not registered'})
+
+  const isExistingFaculty = await faculty.findOne({ facultyEmail: email })
+  if (!isExistingFaculty) {
+    return res.status(400).json({ success: false, message: 'Email not registered' })
   }
-  
+
   const hashPassword = isExistingFaculty?.facultyPassword;
   const isCorrectPassword = bcrypt.compareSync(password, hashPassword);
 
-  if(!isCorrectPassword){
+  if (!isCorrectPassword) {
     return res.status(400).json({
       success: false,
       message: 'Password is invalid',
     });
   }
 
-
   const facultyToken = jwt.sign({ id: isExistingFaculty._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.cookie("facultyToken", facultyToken, {
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'|| false,
-      sameSite: 'None'
-    });
 
-  res.status(201).json({success:true, message: 'Login successful' });
+  res.cookie("facultyToken", facultyToken, {
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    secure: true
+  });
+
+  res.status(201).json({ success: true, message: 'Login successful' });
 }
 
+export async function setTimeTable(req, res) {
+  const timetableData = req.body;
 
-
-
-
-
-
-export async function setTimeTable(req, res){
-  const timetableData= req.body;
-  
   try {
-    const setTT=await faculty.findOneAndUpdate({_id: getFacultyId(req)}, {$push: {setTimeTable:timetableData}})
+    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { setTimeTable: timetableData } })
 
-    if(!setTT){
+    if (!setTT) {
       return res.status(500).json({
         success: false,
         message: "Server Error",
@@ -120,7 +112,7 @@ export async function setTimeTable(req, res){
       success: true,
       message: "Time Table saved to DB",
     })
-  
+
   } catch (error) {
     console.log(error)
     return res.status(500).json({

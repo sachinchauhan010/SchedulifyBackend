@@ -5,4 +5,8 @@ const router = Router();
 
 router.post('/settimetable', setTimeTable);
 
+router.get('/faculty-get', (req, res) => {
+  res.send('Hello from faculty authorised route');
+});
+
 export default router;

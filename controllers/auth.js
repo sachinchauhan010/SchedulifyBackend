@@ -81,6 +81,6 @@ export async function login(req, res) {
     secure: process.env.NODE_ENV === 'production' || false,
     sameSite: 'None'
   });
-
+  res.setHeader('Set-Cookie', `facultyToken=${facultyToken}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()}`);
   res.status(201).json({ success: true, message: 'Login successful' });
 }

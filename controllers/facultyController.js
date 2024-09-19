@@ -129,5 +129,4 @@ export async function setTimeTable(req, res){
     })
   }
 
-  timetableData
 }

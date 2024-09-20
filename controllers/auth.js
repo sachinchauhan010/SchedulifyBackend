@@ -84,3 +84,16 @@ export async function login(req, res) {
   res.setHeader('Set-Cookie', `facultyToken=${facultyToken}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()}`);
   res.status(201).json({ success: true, message: 'Login successful' });
 }
+
+export async function logout(req, res) {
+  res.cookie("facultyToken", "", {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' || false,
+    sameSite: 'None'
+  });
+
+  res.setHeader('Set-Cookie', `facultyToken=; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now()).toUTCString()}`);
+
+  res.status(201).json({ success: true, message: 'Logout successful' });
+}

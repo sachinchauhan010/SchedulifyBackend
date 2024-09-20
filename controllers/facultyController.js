@@ -11,10 +11,8 @@ export const getFacultyId = (req) => {
 
 export async function setTimeTable(req, res) {
   const timetableData = req.body;
-
   try {
-    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { setTimeTable: timetableData } })
-
+    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { facultyTimeTable: timetableData } })
     if (!setTT) {
       return res.status(500).json({
         success: false,

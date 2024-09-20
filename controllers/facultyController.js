@@ -35,3 +35,20 @@ export async function setTimeTable(req, res) {
   }
 
 }
+
+export async function getUserName(req, res) {
+  const {name}= await faculty.findOne({_id: getFacultyId(req)})
+
+  if(!name){
+    res.send.status(400).json({
+      success: false,
+      message: "User's Name retrieve failed"
+    })
+  }
+
+  res.send.status(200).json({
+    success:true,
+    message: "User's name retrieve successfully",
+    userData: name
+  })
+}

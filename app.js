@@ -13,7 +13,7 @@ const corsOptions = {
   credentials: true,
   origin: ['https://trackmyclass.vercel.app', 'http://localhost:5173'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  preflightContinue: true,
+  // preflightContinue: true,
   optionsSuccessStatus: 200
 }
 

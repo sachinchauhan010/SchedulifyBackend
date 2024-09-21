@@ -50,3 +50,21 @@ export async function getUserName(req, res) {
     userData: facultyName
   })
 }
+
+export async function getSchedule(req, res){
+  const {facultyTimeTable} = await faculty.findOne({_id:getFacultyId(req)})
+  
+  if(!facultyTimeTable){
+    return res.status(500).json({
+      success:false,
+      messgae:"Failed to fetch the Schedules"
+    })
+  }
+
+  return res.status(200).json({
+    success:true,
+    messgae:"Successfully fetch the Schedules",
+    data:facultyTimeTable
+  })
+
+}

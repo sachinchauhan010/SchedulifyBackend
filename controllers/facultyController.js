@@ -35,9 +35,9 @@ export async function setTimeTable(req, res) {
 }
 
 export async function getUserName(req, res) {
-  const {facultyName}= await faculty.findOne({_id: getFacultyId(req)})
+  const { facultyName } = await faculty.findOne({ _id: getFacultyId(req) })
 
-  if(!facultyName){
+  if (!facultyName) {
     return res.status(400).json({
       success: false,
       message: "User's Name retrieve failed"
@@ -45,26 +45,26 @@ export async function getUserName(req, res) {
   }
 
   return res.status(200).json({
-    success:true,
+    success: true,
     message: "User's name retrieve successfully",
     userData: facultyName
   })
 }
 
-export async function getSchedule(req, res){
-  const {facultyTimeTable} = await faculty.findOne({_id:getFacultyId(req)})
-  
-  if(!facultyTimeTable){
+export async function getSchedule(req, res) {
+  const { facultyTimeTable } = await faculty.findOne({ _id: getFacultyId(req) })
+
+  if (!facultyTimeTable) {
     return res.status(500).json({
-      success:false,
-      messgae:"Failed to fetch the Schedules"
+      success: false,
+      messgae: "Failed to fetch the Schedules"
     })
   }
 
   return res.status(200).json({
-    success:true,
-    messgae:"Successfully fetch the Schedules",
-    data:facultyTimeTable
+    success: true,
+    messgae: "Successfully fetch the Schedules",
+    data: facultyTimeTable
   })
 
 }

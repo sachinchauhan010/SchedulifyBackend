@@ -97,3 +97,22 @@ export async function logout(req, res) {
 
   res.status(201).json({ success: true, message: 'Logout successful' });
 }
+
+export async function check_auth(req, res) {
+
+  const token = req?.cookies?.facultyToken;
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      name: '',
+      message: 'invalid token'
+    })
+  }
+
+
+  const facultyToken = jwt.verify(token, process.env.JWT_SECRET)
+  const { facultyName } = await faculty.findOne({ _id: facultyToken?.id })
+
+  res.status(201).json({ success: true, name: facultyName, message: 'Login successful' });
+}

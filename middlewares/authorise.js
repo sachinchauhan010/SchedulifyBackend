@@ -5,7 +5,7 @@ export default function authoriseRoute(requiredRole) {
     const token = req?.cookies?.facultyToken;
 
     if (!token) {
-      return res.status(401).json({ message: 'Authentication token is missing' });
+      return res.status(401).json({ success: false, message: 'Authentication token is missing' });
     }
 
     try {

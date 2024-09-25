@@ -37,6 +37,11 @@ const facultySignupSchema = new Schema({
     default: ROLES.FACULTY,
   },
 
+  isVerified:{
+    type: Boolean,
+    default: false
+  }
+
 });
 
 const faculty = mongoose.model('faculty', facultySignupSchema);

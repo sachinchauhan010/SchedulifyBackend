@@ -4,29 +4,29 @@ import { ROLES } from '../../enum/role.js'
 const { Schema } = mongoose;
 
 const facultySignupSchema = new Schema({
-  facultyName: {
+  name: {
     type: String,
     required: true,
   },
 
-  facultyId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-
-  facultyEmail: {
+  id: {
     type: String,
     required: true,
     unique: true,
   },
 
-  facultyPassword: {
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+
+  password: {
     type: String,
     required: true,
   },
 
-  facultyTimeTable: {
+  timetable: {
     type: Array,
   },
 

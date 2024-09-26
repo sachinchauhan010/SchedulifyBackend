@@ -27,10 +27,10 @@ export async function signup(req, res) {
     const hashPassword = bcrypt.hashSync(password, salt);
 
     const newFaculty = new faculty({
-      facultyName: name,
-      facultyId: id,
-      facultyEmail: email,
-      facultyPassword: hashPassword,
+      name: name,
+      id: id,
+      email: email,
+      password: hashPassword,
     })
 
     const savedUser = await newFaculty.save();
@@ -63,7 +63,7 @@ export async function login(req, res) {
     });
   }
 
-  const isExistingFaculty = await faculty.findOne({ facultyEmail: email })
+  const isExistingFaculty = await faculty.findOne({ email: email })
   if (!isExistingFaculty) {
     return res.status(400).json({ success: false, message: 'Email not registered' })
   }
@@ -73,7 +73,7 @@ export async function login(req, res) {
   }
 
 
-  const hashPassword = isExistingFaculty?.facultyPassword;
+  const hashPassword = isExistingFaculty?.password;
   const isCorrectPassword = bcrypt.compareSync(password, hashPassword);
 
   if (!isCorrectPassword) {
@@ -121,9 +121,9 @@ export async function check_auth(req, res) {
 
 
   const facultyToken = jwt.verify(token, process.env.JWT_SECRET)
-  const { facultyName } = await faculty.findOne({ _id: facultyToken?.id })
+  const { name } = await faculty.findOne({ _id: facultyToken?.id })
 
-  res.status(201).json({ success: true, name: facultyName, message: 'Login successful' });
+  res.status(201).json({ success: true, name: name, message: 'Login successful' });
 }
 
 

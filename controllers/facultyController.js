@@ -12,7 +12,7 @@ export const getFacultyId = (req) => {
 export async function setTimeTable(req, res) {
   const timetableData = req.body;
   try {
-    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { facultyTimeTable: timetableData } })
+    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { timetable: timetableData } })
     if (!setTT) {
       return res.status(500).json({
         success: false,
@@ -35,9 +35,9 @@ export async function setTimeTable(req, res) {
 }
 
 export async function getUserName(req, res) {
-  const { facultyName } = await faculty.findOne({ _id: getFacultyId(req) })
+  const { name } = await faculty.findOne({ _id: getFacultyId(req) })
 
-  if (!facultyName) {
+  if (!name) {
     return res.status(400).json({
       success: false,
       message: "User's Name retrieve failed"
@@ -47,14 +47,14 @@ export async function getUserName(req, res) {
   return res.status(200).json({
     success: true,
     message: "User's name retrieve successfully",
-    userData: facultyName
+    userData: name
   })
 }
 
 export async function getSchedule(req, res) {
-  const { facultyTimeTable } = await faculty.findOne({ _id: getFacultyId(req) })
+  const { timetable } = await faculty.findOne({ _id: getFacultyId(req) })
 
-  if (!facultyTimeTable) {
+  if (!timetable) {
     return res.status(500).json({
       success: false,
       messgae: "Failed to fetch the Schedules"
@@ -64,7 +64,7 @@ export async function getSchedule(req, res) {
   return res.status(200).json({
     success: true,
     messgae: "Successfully fetch the Schedules",
-    data: facultyTimeTable
+    data: timetable
   })
 
 }

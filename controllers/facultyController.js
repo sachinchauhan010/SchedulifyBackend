@@ -95,9 +95,8 @@ export async function getSchedule(req, res) {
   }
 }
 
-export async function updateAttendence (req, res){
+export async function updateAttendence(req, res) {
   const { periodId, date, status } = req.body;
-
   try {
     const timetable = await Timetable.findOne({
       "schedule.periods.periodId": periodId,
@@ -110,9 +109,9 @@ export async function updateAttendence (req, res){
       });
     }
 
-    const day = timetable.schedule.find((daySchedule) =>
-      daySchedule.periods.some((period) => period.periodId === periodId)
-    );
+    const day = timetable.schedule.find((daySchedule) => {
+      return daySchedule.periods.find((period) => period.periodId === periodId)
+    });
 
     if (!day) {
       return res.status(404).json({
@@ -131,17 +130,16 @@ export async function updateAttendence (req, res){
 
     const existingRecord = period.attendanceRecords.find(record => record.date === date);
     if (existingRecord) {
-      console.log(existingRecord, "exit")
-      console.log(status, "status")
-      existingRecord.attended = (status=="no") ? false : true
+      existingRecord.attended = (status == "no") ? false : true;
+      period.attendanceRecords.push(existingRecord);
     } else {
-      console.log("Called")
-      period.attendanceRecords.push({ date , attended:(status=="no") ? false : true});
+      period.attendanceRecords.push({ date, attended: (status == "no") ? false : true });
     }
-    console.log(existingRecord, "$$$$$$$$$$")
-    timetable.markModified("schedule");
 
-    const tt=await timetable.save();
+    await timetable.markModified('schedule');
+
+    const tt = await timetable.save();
+
     res.status(200).json({
       success: true,
       message: "Attendance updated successfully.",
@@ -155,7 +153,7 @@ export async function updateAttendence (req, res){
   }
 };
 
-export async function setDefaultAttendence(req, res){
+export async function setDefaultAttendence(req, res) {
   try {
     const timetable = await getTimetable(req);
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -163,11 +161,10 @@ export async function setDefaultAttendence(req, res){
     timetable.schedule.forEach((daySchedule) => {
       if (daysOfWeek.includes(daySchedule.day)) {
         const date = getDateOfWeek(daySchedule.day);
-        
+
         daySchedule.periods.forEach(period => {
           const existingRecord = period.attendanceRecords.find(record => record.date === date);
           if (!existingRecord) {
-            console.log("Not")
             period.attendanceRecords.push({ date, attended: true });
           }
         });

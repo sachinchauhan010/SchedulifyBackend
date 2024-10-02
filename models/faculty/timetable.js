@@ -9,12 +9,6 @@ const attendanceRecordSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  // attendanceRecords: {
-  //   type: Map,
-  //   of: String, // Values will be "yes" or "no"
-  //   default: {},
-  //   required: true
-  // }
 
 });
 
@@ -69,21 +63,6 @@ const periodSchema = new mongoose.Schema({
   }
 });
 
-// // Method to mark a class as attended or missed
-// periodSchema.methods.markAttendance = function(attended, date) {
-//   // Add an attendance record for the provided date
-//   this.attendanceRecords.push({ date, attended });
-  
-//   // Update the count of attended classes
-//   if (attended) {
-//     this.classesAttended += 1;
-//   }
-
-//   // Increment the total classes count (since a class was either attended or missed)
-//   this.totalClasses += 1;
-
-//   return this.save(); // Save the updated document
-// };
 
 const daySchema = new mongoose.Schema({
   day: {

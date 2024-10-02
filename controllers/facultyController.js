@@ -130,13 +130,12 @@ export async function updateAttendence(req, res) {
 
     const existingRecord = period.attendanceRecords.find(record => record.date === date);
     if (existingRecord) {
-      existingRecord.attended = (status == "no") ? false : true;
-      period.attendanceRecords.push(existingRecord);
+      existingRecord.attended = (status === "no") ? false : true;
     } else {
       period.attendanceRecords.push({ date, attended: (status == "no") ? false : true });
     }
 
-    await timetable.markModified('schedule');
+    timetable.markModified('schedule');
 
     const tt = await timetable.save();
 

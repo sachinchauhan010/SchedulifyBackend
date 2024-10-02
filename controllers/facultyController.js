@@ -1,6 +1,8 @@
 import faculty from '../models/faculty/signup.js';
 import jwt from 'jsonwebtoken'
-
+import Timetable from '../models/faculty/timetable.js';
+import moment from 'moment'
+import mongoose from 'mongoose';
 export const getFacultyId = (req) => {
   const encodedToken = req.cookies?.facultyToken
   if (!encodedToken) return null
@@ -9,29 +11,55 @@ export const getFacultyId = (req) => {
   return decodedToken?.id
 }
 
-export async function setTimeTable(req, res) {
-  const timetableData = req.body;
-  try {
-    const setTT = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $push: { timetable: timetableData } })
-    if (!setTT) {
-      return res.status(500).json({
-        success: false,
-        message: "Server Error",
-      })
-    }
-    return res.status(200).json({
-      success: true,
-      message: "Time Table saved to DB",
-    })
-
-  } catch (error) {
-    console.log(error)
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    })
+// Helper function to get timetable
+export const getTimetable = async (req) => {
+  const facultyData = await faculty.findOne({ _id: getFacultyId(req) });
+  if (!facultyData || !facultyData.timetableId) {
+    throw new Error("Failed to fetch the Timetable ID for the faculty.");
   }
 
+  const timetable = await Timetable.findOne({ timetableId: facultyData.timetableId });
+  if (!timetable) {
+    throw new Error("Timetable not found.");
+  }
+
+  return timetable;
+};
+
+function getDateOfWeek(dayOfWeek) {
+  return moment().day(dayOfWeek).format('DD/MM/YYYY');
+}
+
+export async function setTimeTable(req, res) {
+
+  try {
+    const { timetableId, schedule } = req.body;
+    const setTTId = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $set: { timetableId: timetableId } })
+    if (!setTTId) {
+      return res.status(500).json({
+        success: false,
+        message: "Time Table ID is not submitted to Faculty",
+      })
+    }
+
+    const timetable = new Timetable({
+      timetableId,
+      schedule,
+    });
+
+    await timetable.save();
+    return res.status(201).json({
+      success: true,
+      message: 'Timetable uploaded successfully!',
+    });
+  } catch (error) {
+    console.error("Error saving timetable:", error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to upload timetable',
+      error: error.message,
+    });
+  }
 }
 
 export async function getUserName(req, res) {
@@ -52,19 +80,109 @@ export async function getUserName(req, res) {
 }
 
 export async function getSchedule(req, res) {
-  const { timetable } = await faculty.findOne({ _id: getFacultyId(req) })
-
-  if (!timetable) {
+  try {
+    const timetable = await getTimetable(req);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully fetched the schedule",
+      data: timetable,
+    });
+  } catch (error) {
     return res.status(500).json({
       success: false,
-      messgae: "Failed to fetch the Schedules"
-    })
+      message: error.message,
+    });
   }
-
-  return res.status(200).json({
-    success: true,
-    messgae: "Successfully fetch the Schedules",
-    data: timetable
-  })
-
 }
+
+export async function updateAttendence(req, res) {
+  const { periodId, date, status } = req.body;
+  try {
+    const timetable = await Timetable.findOne({
+      "schedule.periods.periodId": periodId,
+    });
+
+    if (!timetable) {
+      return res.status(404).json({
+        success: false,
+        message: "Period not found in the timetable.",
+      });
+    }
+
+    const day = timetable.schedule.find((daySchedule) => {
+      return daySchedule.periods.find((period) => period.periodId === periodId)
+    });
+
+    if (!day) {
+      return res.status(404).json({
+        success: false,
+        message: "Day not found in the timetable.",
+      });
+    }
+
+    const period = day.periods.find((p) => p.periodId === periodId);
+    if (!period) {
+      return res.status(404).json({
+        success: false,
+        message: "Period not found.",
+      });
+    }
+
+    const existingRecord = period.attendanceRecords.find(record => record.date === date);
+    if (existingRecord) {
+      existingRecord.attended = (status === "no") ? false : true;
+    } else {
+      period.attendanceRecords.push({ date, attended: (status == "no") ? false : true });
+    }
+
+    timetable.markModified('schedule');
+
+    const tt = await timetable.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Attendance updated successfully.",
+    });
+  } catch (error) {
+    console.error("Error updating attendance:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update attendance.",
+    });
+  }
+};
+
+export async function setDefaultAttendence(req, res) {
+  try {
+    const timetable = await getTimetable(req);
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    timetable.schedule.forEach((daySchedule) => {
+      if (daysOfWeek.includes(daySchedule.day)) {
+        const date = getDateOfWeek(daySchedule.day);
+
+        daySchedule.periods.forEach(period => {
+          const existingRecord = period.attendanceRecords.find(record => record.date === date);
+          if (!existingRecord) {
+            period.attendanceRecords.push({ date, attended: true });
+          }
+        });
+      }
+    });
+
+    await timetable.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Default attendance set for the week successfully.",
+    });
+  } catch (error) {
+    console.error("Error setting default attendance:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to set default attendance.",
+      error: error.message,
+    });
+  }
+}
+

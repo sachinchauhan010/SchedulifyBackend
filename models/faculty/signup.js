@@ -26,8 +26,9 @@ const facultySignupSchema = new Schema({
     required: true,
   },
 
-  timetable: {
-    type: Array,
+  timetableId: {
+    // type: Array,
+    type: String
   },
 
   role: {

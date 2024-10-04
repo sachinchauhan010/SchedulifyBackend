@@ -1,45 +1,15 @@
 import faculty from '../models/faculty/signup.js';
-import jwt from 'jsonwebtoken'
 import Timetable from '../models/faculty/timetable.js';
-import moment from 'moment'
-import mongoose from 'mongoose';
-export const getFacultyId = (req) => {
-  const encodedToken = req.cookies?.facultyToken
-  if (!encodedToken) return null
+import { sendResponse } from '../utils/ResponseHandle.js';
+import { getTimetable, getDateOfWeek, getFacultyId } from '../utils/Helper.js';
 
-  const decodedToken = jwt.verify(encodedToken, process.env.JWT_SECRET)
-  return decodedToken?.id
-}
-
-// Helper function to get timetable
-export const getTimetable = async (req) => {
-  const facultyData = await faculty.findOne({ _id: getFacultyId(req) });
-  if (!facultyData || !facultyData.timetableId) {
-    throw new Error("Failed to fetch the Timetable ID for the faculty.");
-  }
-
-  const timetable = await Timetable.findOne({ timetableId: facultyData.timetableId });
-  if (!timetable) {
-    throw new Error("Timetable not found.");
-  }
-
-  return timetable;
-};
-
-function getDateOfWeek(dayOfWeek) {
-  return moment().day(dayOfWeek).format('DD/MM/YYYY');
-}
 
 export async function setTimeTable(req, res) {
-
   try {
     const { timetableId, schedule } = req.body;
     const setTTId = await faculty.findOneAndUpdate({ _id: getFacultyId(req) }, { $set: { timetableId: timetableId } })
     if (!setTTId) {
-      return res.status(500).json({
-        success: false,
-        message: "Time Table ID is not submitted to Faculty",
-      })
+      return sendResponse(res, 500, false, "Failed to Find the Faculty Timetable ID")
     }
 
     const timetable = new Timetable({
@@ -48,50 +18,26 @@ export async function setTimeTable(req, res) {
     });
 
     await timetable.save();
-    return res.status(201).json({
-      success: true,
-      message: 'Timetable uploaded successfully!',
-    });
+    return sendResponse(res, 201, true, "Timetable uploaded successfully")
   } catch (error) {
-    console.error("Error saving timetable:", error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to upload timetable',
-      error: error.message,
-    });
+    return sendResponse(res, 500, false, error.message)
   }
 }
 
 export async function getUserName(req, res) {
   const { name } = await faculty.findOne({ _id: getFacultyId(req) })
-
   if (!name) {
-    return res.status(400).json({
-      success: false,
-      message: "User's Name retrieve failed"
-    });
+    return sendResponse(res, 400, false, "User name reterival Failed")
   }
-
-  return res.status(200).json({
-    success: true,
-    message: "User's name retrieve successfully",
-    userData: name
-  })
+  return sendResponse(res, 200, true, "User's name reterive successfully", name)
 }
 
 export async function getSchedule(req, res) {
   try {
     const timetable = await getTimetable(req);
-    return res.status(200).json({
-      success: true,
-      message: "Successfully fetched the schedule",
-      data: timetable,
-    });
+    return sendResponse(res, 200, true, "Successfully fetched the schedule", timetable)
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return sendResponse(res, 500, false, error.message)
   }
 }
 
@@ -103,10 +49,7 @@ export async function updateAttendence(req, res) {
     });
 
     if (!timetable) {
-      return res.status(404).json({
-        success: false,
-        message: "Period not found in the timetable.",
-      });
+      return sendResponse(res, 404, false, "Period not found in the timetable")
     }
 
     const day = timetable.schedule.find((daySchedule) => {
@@ -114,18 +57,12 @@ export async function updateAttendence(req, res) {
     });
 
     if (!day) {
-      return res.status(404).json({
-        success: false,
-        message: "Day not found in the timetable.",
-      });
+      return sendResponse(res, 404, false, "Day not found in the timetable")
     }
 
     const period = day.periods.find((p) => p.periodId === periodId);
     if (!period) {
-      return res.status(404).json({
-        success: false,
-        message: "Period not found.",
-      });
+      return sendResponse(res, 404, false, "PeriodId not found in the timetable")
     }
 
     const existingRecord = period.attendanceRecords.find(record => record.date === date);
@@ -138,17 +75,10 @@ export async function updateAttendence(req, res) {
     timetable.markModified('schedule');
 
     const tt = await timetable.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Attendance updated successfully.",
-    });
+    return sendResponse(res, 200, true, "SAttendance updated successfully")
+   
   } catch (error) {
-    console.error("Error updating attendance:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update attendance.",
-    });
+    return sendResponse(res, 500, false, error.message)
   }
 };
 
@@ -171,18 +101,9 @@ export async function setDefaultAttendence(req, res) {
     });
 
     await timetable.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Default attendance set for the week successfully.",
-    });
+    return sendResponse(res, 200, true, "Default attendance set for the week successfully")
   } catch (error) {
-    console.error("Error setting default attendance:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to set default attendance.",
-      error: error.message,
-    });
+    return sendResponse(res, 500, false, error.message)
   }
 }
 

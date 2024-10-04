@@ -103,7 +103,6 @@ export async function logout(req, res) {
   });
 
   res.setHeader('Set-Cookie', `facultyToken=; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Expires=${new Date(Date.now()).toUTCString()}`);
-
   res.status(201).json({ success: true, message: 'Logout successful' });
 }
 

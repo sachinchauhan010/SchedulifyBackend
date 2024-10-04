@@ -1,42 +1,8 @@
 import faculty from '../models/faculty/signup.js';
 import Timetable from '../models/faculty/timetable.js';
-<<<<<<< HEAD
 import { sendResponse } from '../utils/ResponseHandle.js';
 import { getTimetable, getDateOfWeek, getFacultyId } from '../utils/Helper.js';
 
-=======
-import moment from 'moment'
-
-export const getFacultyId = (req) => {
-  const encodedToken = req.cookies?.facultyToken
-  if (!encodedToken) return null
-
-  const decodedToken = jwt.verify(encodedToken, process.env.JWT_SECRET)
-  return decodedToken?.id
-}
-
-export const getTimetable = async (req) => {
-  const facultyData = await faculty.findOne({ _id: getFacultyId(req) });
-  if (!facultyData || !facultyData.timetableId) {
-    throw new Error("Failed to fetch the Timetable ID for the faculty.");
-  }
-
-  const timetable = await Timetable.findOne({ timetableId: facultyData.timetableId });
-  if (!timetable) {
-    throw new Error("Timetable not found.");
-  }
-
-  return timetable;
-};
-
-export const getAttendence = async (req) => {
-
-}
-
-function getDateOfWeek(dayOfWeek) {
-  return moment().day(dayOfWeek).format('DD/MM/YYYY');
-}
->>>>>>> dedb17b3a17c69e17eabb9cd1c6844f2d6f71957
 
 export async function setTimeTable(req, res) {
   try {

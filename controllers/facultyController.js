@@ -1,8 +1,42 @@
 import faculty from '../models/faculty/signup.js';
 import Timetable from '../models/faculty/timetable.js';
+<<<<<<< HEAD
 import { sendResponse } from '../utils/ResponseHandle.js';
 import { getTimetable, getDateOfWeek, getFacultyId } from '../utils/Helper.js';
 
+=======
+import moment from 'moment'
+
+export const getFacultyId = (req) => {
+  const encodedToken = req.cookies?.facultyToken
+  if (!encodedToken) return null
+
+  const decodedToken = jwt.verify(encodedToken, process.env.JWT_SECRET)
+  return decodedToken?.id
+}
+
+export const getTimetable = async (req) => {
+  const facultyData = await faculty.findOne({ _id: getFacultyId(req) });
+  if (!facultyData || !facultyData.timetableId) {
+    throw new Error("Failed to fetch the Timetable ID for the faculty.");
+  }
+
+  const timetable = await Timetable.findOne({ timetableId: facultyData.timetableId });
+  if (!timetable) {
+    throw new Error("Timetable not found.");
+  }
+
+  return timetable;
+};
+
+export const getAttendence = async (req) => {
+
+}
+
+function getDateOfWeek(dayOfWeek) {
+  return moment().day(dayOfWeek).format('DD/MM/YYYY');
+}
+>>>>>>> dedb17b3a17c69e17eabb9cd1c6844f2d6f71957
 
 export async function setTimeTable(req, res) {
   try {
@@ -47,7 +81,7 @@ export async function updateAttendence(req, res) {
     const timetable = await Timetable.findOne({
       "schedule.periods.periodId": periodId,
     });
-
+    console.log(timetable.timetableId, "&&&&")
     if (!timetable) {
       return sendResponse(res, 404, false, "Period not found in the timetable")
     }
@@ -106,4 +140,35 @@ export async function setDefaultAttendence(req, res) {
     return sendResponse(res, 500, false, error.message)
   }
 }
+
+export async function getTodayAttendence(req, res) {
+  const { currDay, currDate } = req.body
+  try {
+    const timetable = await getTimetable(req)
+    const day = timetable.schedule.find((Day) => Day.day === currDay)
+
+    if (!day) {
+      return res.status(404).json({ error: "Day schedule not found" })
+    }
+    const attendedPeriod=[]
+
+    day.periods.forEach((period) => {
+      let attendanceRecords = period.attendanceRecords;
+      const existingRecord = attendanceRecords.find(record => record.date === currDate)
+
+      if (existingRecord.attended) {
+        attendedPeriod.push({ periodId: period.periodId, date:currDate, attended: true})
+      } else {
+        attendedPeriod.push({ periodId: period.periodId, date:currDate, attended: false })
+      }
+    });
+
+    return res.status(200).json({ message: "Attendance updated successfully",success: true, attendence:attendedPeriod })
+
+  } catch (error) {
+    console.error("Error setting attendance:", error);
+    return res.status(500).json({ message: "An error occurred while updating attendance" , success:false, attendence:attendedPeriod})
+  }
+}
+
 
